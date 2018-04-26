@@ -3,6 +3,10 @@ package views;
 import java.awt.Point;
 import java.text.DecimalFormat;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Observable;
+import java.util.Observer;
+
 import controller.ControllerMain;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -23,6 +27,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import model.Player;
 import model.Projectile;
+import model.TowerGame;
 import model.Mobs.Archon;
 import model.Mobs.Mob;
 
@@ -41,7 +46,7 @@ import model.Towers.Tower;
 // When the game begins in the map, it should be animated. That includes all
 // sprites moving.
 
-public class MapView extends StackPane {
+public class MapView extends StackPane implements Observer {
   public static final double ghostTowerSize=60;
   private GraphicsContext gcCommand;
   private Button backButton;
@@ -85,7 +90,7 @@ public class MapView extends StackPane {
   
   private Player thePlayer;
   private DecimalFormat formatter;
-  private static int deadMobs;
+  private TowerGame theGame;
   
   
   /**
@@ -93,11 +98,15 @@ public class MapView extends StackPane {
   * state. HUD includes a Command Panel for game stats (Player HP, Cash, Kills, Difficulty),
   * tower purchases, tower upgrades, and status updates (click on an item in game, warning
   * messages) Takes a Button for implementation of a Back Button to Main Menu.
+   * @param tg 
   * 
   * @param Button back
   *          - Back Button returns to Main Menu
   */
-  public MapView(Button back) {
+  public MapView(Button back, TowerGame tg) {
+    
+    theGame = tg;
+    
     //variables for towewr placement
 	mousePos=new Point(0,0);	
 	towerPlacement=false;
@@ -117,7 +126,6 @@ public class MapView extends StackPane {
     StackPane.setAlignment(canvas, Pos.TOP_CENTER);
     background = new Image("file:assets/images/map/demoMap.png", false);
     formatter = new DecimalFormat("#,###");
-    deadMobs = 0;
 
     // Command Panel - Black Background
     Canvas commandCanvas = new Canvas(800, 880);
@@ -317,30 +325,6 @@ public class MapView extends StackPane {
   }
 
   /**
-  * Set the number of kills for Player.
-  * 
-  * @param num
-  *          - Integer representing number of enemy kills
-  * @return None
-  */
-  public void setKillsNum(int num) {
-    deadMobs = num;
-  }
-  
-  /**
-  * Increment the number of Player kills by one.
-  * 
-  * @param None
-  * 
-  * @return None
-  */
-  public static void incrKills()
-  {
-	  deadMobs++;
-	  ControllerMain.thePlayer.addCash(50);
-  }
-
-  /**
   * Set the amount of Cash for Player.
   * cashEarned is int instance variable.
   * cashNum is Label on Command Panel.
@@ -352,7 +336,7 @@ public class MapView extends StackPane {
   */
   public void setCashNum(int num) {
 	// Sets the Player Cash Label
-    cashNum.setText("$" + String.valueOf(ControllerMain.thePlayer.getCash()));
+    cashNum.setText("$" + String.valueOf(theGame.getCash()));
   }
 
   /**
@@ -459,51 +443,38 @@ public class MapView extends StackPane {
   */
   public void drawMap() {
 	gc.drawImage(background, 0, 0);
+System.out.println("Drew background.");
     gc.strokeLine(0, 800, 800, 800);
 
+    drawTowers();
+    drawMobs();
+    drawProjectiles();
+
     if(towerPlacement) {
-    	drawGhostTower();
+      drawGhostTower();
     }
+  }
 
-    double health = thePlayer.getHP() / 100;
-    String healthStr = formatter.format(health);
-    
-    String cashStr = formatter.format(ControllerMain.thePlayer.getCash());
-    
-    // UI can't be updated on a non-application thread
-    // Since drawMap() is called from a non-application thread,
-    // add this thread to the event queue to be called later 
-    Platform.runLater(new Runnable() {
-        @Override
-        public void run() {
-            // if you change the UI, do it here !
-        	healthNum.setText(healthStr);
-        	killsNum.setText(String.valueOf(deadMobs));
-        	cashNum.setText("$"+cashStr);
-        }
-    });
-
-    // draws all current towers
-    HashSet<Tower> towersCpy = new HashSet(ControllerMain.towers);
-    for (Tower t: towersCpy) {
-      gc.drawImage(t.getImage(), t.getX(), t.getY(),
-    		  	   ghostTowerSize, ghostTowerSize); // TODO: Ben, center this graphic.
-    }
-    towersCpy.clear();
-
-    // draws every mob
-    HashSet<Mob> mobsCpy = new HashSet(ControllerMain.mobs);
-    for (Mob m: mobsCpy) {
-      drawMob(m);
-    }
-    mobsCpy.clear();
-    
-    // draws any current projectiles
-    HashSet<Projectile> projectilesCpy = new HashSet(ControllerMain.projectiles);
-    for (Projectile p: projectilesCpy) {
+  private void drawProjectiles() {
+    for (Iterator<Projectile> itr = theGame.getProjectiles().iterator(); itr.hasNext(); ) {
+      Projectile p  = itr.next();
       gc.drawImage(p.getImage(), 0,0, 1001, 1001, p.getX() - 15, p.getY() -15, 30, 30);
     }
-    projectilesCpy.clear();
+  }
+
+  private void drawMobs() {
+    for (Iterator<Mob> itr = theGame.getMobs().iterator(); itr.hasNext(); ) {
+      Mob m = itr.next();
+      drawMob(m);
+    }
+  }
+
+  private void drawTowers() {
+    for (Iterator<Tower> itr = theGame.getTowers().iterator(); itr.hasNext(); ) {
+      Tower t = itr.next();
+      gc.drawImage(t.getImage(), t.getX(), t.getY(),
+          ghostTowerSize, ghostTowerSize); // TODO: Ben, will you center this graphic?
+    }
   }
   
 
@@ -591,23 +562,50 @@ public class MapView extends StackPane {
 			//the different buttons
 			if(currName.equals("Marine")) {
 				newTower=new Marine(new Point((int)(mousePos.getX()-.5*ghostTowerSize), 
-					                		    (int)(mousePos.getY()-.5*ghostTowerSize)));
+					                		    (int)(mousePos.getY()-.5*ghostTowerSize)), theGame);
 			}
 			else if( currName.equals("Depot")){
 				newTower=new Depot(new Point((int)(mousePos.getX()-.5*ghostTowerSize), 
-					                		    (int)(mousePos.getY()-.5*ghostTowerSize)));
+					                		    (int)(mousePos.getY()-.5*ghostTowerSize)), theGame);
 			}
 			else if(currName.equals("Tank")) {
 				newTower=new Tank(new Point((int)(mousePos.getX()-.5*ghostTowerSize), 
-					                		    (int)(mousePos.getY()-.5*ghostTowerSize)));
+					                		    (int)(mousePos.getY()-.5*ghostTowerSize)), theGame);
 			}
 			
-			ControllerMain.towers.add(newTower);
+			theGame.add(newTower);
 
 		}
 		System.out.println("Mouse Clicked");
 	  }
     }
+  }
+
+  @Override
+  public void update(Observable o, Object arg) {
+    drawMap();
+System.out.println("Map drawn");
+    double health = thePlayer.getHP() / 100;
+    String healthStr = formatter.format(health);
+    
+    String cashStr = formatter.format(theGame.getCash());
+
+    
+    // UI can't be updated on a non-application thread
+    // Since drawMap() is called from a non-application thread,
+    // add this thread to the event queue to be called later
+    /*
+    Platform.runLater(new Runnable() {
+        @Override
+        public void run() {
+            // if you change the UI, do it here !
+          healthNum.setText(healthStr);
+          killsNum.setText(String.valueOf(theGame.getKillCount()));
+          cashNum.setText("$"+cashStr);
+        }//TODO see if I can change this.
+    });*/
+    
+    System.out.println("Update view finished.");
   }
 }
 

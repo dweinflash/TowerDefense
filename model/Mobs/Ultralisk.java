@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import controller.ControllerMain;
+import model.Player;
+import model.TowerGame;
 
 
 /**
@@ -16,7 +18,7 @@ import controller.ControllerMain;
  */
 public class Ultralisk extends Mob {
 
-	public Ultralisk(List<Point> movementPath) {
+	public Ultralisk(List<Point> movementPath, TowerGame game) {
 		super(movementPath, ControllerMain.TILE_SIZE/3, 
 				ArmorAttribute.MEDIUM_ARMOR, 
 				AttackAttribute.STRONG_ATTACK, 
@@ -32,7 +34,8 @@ public class Ultralisk extends Mob {
         105.0,
         101.0,
         108.0, 
-        9
+        9,
+        game
         );
 
 	}

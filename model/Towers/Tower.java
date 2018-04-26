@@ -1,6 +1,7 @@
 package model.Towers;
 
 import model.Projectile;
+import model.TowerGame;
 import model.Mobs.Mob;
 
 import java.awt.Point;
@@ -32,7 +33,8 @@ public abstract class Tower {
   protected Thread towerAnxiety;
   protected Point location;
   protected Range range;
-  private String imageFilePath;
+  protected String imageFilePath;
+  protected TowerGame theGame;
   
   /**
    * 
@@ -42,49 +44,14 @@ public abstract class Tower {
    * @param range - the radius around which a tower can detect and fire at mobs.
    * @param imageFP - the file path to the image representing the tower, images are retrieved by flyweight
    */
-  public Tower(int cost, String name, Point location, Range range, String imageFP) {
+  public Tower(int cost, String name, Point location, Range range, String imageFP, TowerGame game) {
 
     this.cost = cost;
     this.name = name;
     this.location = location;
     this.range = range;
     imageFilePath = imageFP;
-    initializeTower();
-  }
-
-  /*
-   * initializeTower initializes tower by starting a thread for it to check for
-   * nearby mobs Parameters: None Returns: None
-   */
-  private void initializeTower() {
-
-    towerAnxiety = new Thread(new Runnable() {
-
-      @Override
-      public void run() {
-        try {
-          while (true) {
-
-            Thread.sleep((long) 60 * ControllerMain.UPDATE_FREQUENCY);
-
-            Set nearbyMobs = getNearbyMobs();
-            if (!nearbyMobs.isEmpty()) {
-              shoot(nearbyMobs);
-            }
-
-            if (!ControllerMain.isPlaying) {
-              break;
-            }
-          }
-
-          System.out.println("Tower Thread: Ended");
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
-    });
-
-    towerAnxiety.start();
+    theGame = game;
   }
 
   abstract protected void shoot(Set<Mob> nearbyMobs);
@@ -127,10 +94,9 @@ public abstract class Tower {
    * the mobs collection in the controller main.
    * @return a HashSet of nearby mobs
    */
-  private Set getNearbyMobs() {
-    Set nearbyMobs = new HashSet();
-    Iterator<Mob> itr = ControllerMain.mobs.iterator();
-    while (itr.hasNext()) {
+  private Set<Mob> getNearbyMobs() {
+    Set<Mob> nearbyMobs = new HashSet<Mob>();
+    for (Iterator<Mob> itr = theGame.getMobs().iterator(); itr.hasNext(); ) {
       Mob nextMob = itr.next();
       if (isNear(nextMob)) {
         nearbyMobs.add(nextMob);
@@ -171,6 +137,17 @@ public abstract class Tower {
 
   public int getCost() {
     return cost;
+  }
+
+  public boolean isDone() {
+    return false;
+  }
+
+  public void update() {
+    Set<Mob> nearbyMobs = getNearbyMobs();
+    if (!nearbyMobs.isEmpty()) {
+      shoot(nearbyMobs);
+    }
   }
 
 }

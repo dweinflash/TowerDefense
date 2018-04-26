@@ -26,14 +26,15 @@ abstract public class Projectile {
   protected ElementalAttribute dmgType;
   protected double blastRadius;
  
-  private String imageFilePath;
+  protected String imageFilePath;
+  protected TowerGame theGame;
 
   
   
   public Projectile(Point startLocation, SpeedAttribute spd,
                     double radius, double baseDamage,  ElementalAttribute ea,
                     String imgFilePath,
-                    int testing) {
+                    TowerGame game) {
 		
     currentLocation = startLocation;
     speed = spd;
@@ -42,10 +43,8 @@ abstract public class Projectile {
     dmgType = ea;
 
     imageFilePath = imgFilePath;
-		
-    if (testing == 0) {
-      initializeProjectile();
-    }
+    
+    theGame = game;
   }
 	
 
@@ -159,5 +158,23 @@ abstract public class Projectile {
 	
   public double getY() {
     return currentLocation.getY();
+  }
+
+
+  public void step() {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  public void update() {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  public boolean isDone() {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import controller.ControllerMain;
+import model.Player;
+import model.TowerGame;
 
 
 /*============================================================================*
@@ -18,7 +20,7 @@ import controller.ControllerMain;
 
 public class BattleCruiser extends Mob{
 
-	public BattleCruiser(List<Point> movementPath) {
+	public BattleCruiser(List<Point> movementPath, TowerGame game) {
 		
 		super(movementPath, ControllerMain.TILE_SIZE/3, 
 				ArmorAttribute.HEAVY_ARMOR, 
@@ -35,7 +37,8 @@ public class BattleCruiser extends Mob{
         77.0,
         0.0,
         0.0, 
-        1
+        1,
+        game
         );
 	}
 }

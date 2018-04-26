@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import controller.ControllerMain;
+import model.Player;
+import model.TowerGame;
 
 /**
  * Marines are the tier one unit of the Terran army.  They have low HP and movement speed and deal reltively little
@@ -16,7 +18,7 @@ import controller.ControllerMain;
  */
 public class Marine extends Mob{
 
-	public Marine(List<Point> movementPath) {
+	public Marine(List<Point> movementPath, TowerGame game) {
 		
 		super(movementPath, ControllerMain.TILE_SIZE/3, 
 				ArmorAttribute.LIGHT_ARMOR, 
@@ -33,7 +35,8 @@ public class Marine extends Mob{
         33.0,
         26.0,
         36.0, 
-        9
+        9,
+        game
         );
 
 

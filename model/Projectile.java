@@ -28,6 +28,7 @@ abstract public class Projectile {
  
   protected String imageFilePath;
   protected TowerGame theGame;
+  private boolean hit = false;
 
   
   
@@ -49,32 +50,6 @@ abstract public class Projectile {
 	
 
   abstract protected void terminate();
-	
-  /* initializeProjectile
-   * starts a thread for a new projectile and shows an animation
-   * Parameters: None
-   * Returns: None
-  */
-  private void initializeProjectile() {
-	  
-    kamakaziImperative = new Thread(new Runnable() {
-      @Override
-      public void run() {
-    	while(!hasReachedTarget()) {
-          try {
-            Thread.sleep((long) ControllerMain.UPDATE_FREQUENCY);
-            
-            updateLocation();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-        }
-    	    terminate();
-      }
-    });
-    
-    kamakaziImperative.start();
-  }
 
   
   /* updateLocation
@@ -104,11 +79,11 @@ abstract public class Projectile {
   private boolean hasReachedTarget() {
 	//area of effect projectile
     if (targetMob == null) {
-       return Metric.closeEnough(currentLocation, targetLocation, blastRadius);
+       return Metric.closeEnough(currentLocation, targetLocation, speed.getSpeed()/2);
     
     //target is a mob
     } else {
-      return Metric.closeEnough(currentLocation, targetMob.getCurrentLocation(), blastRadius);
+      return Metric.closeEnough(currentLocation, targetMob.getCurrentLocation(), blastRadius+speed.getSpeed()/2);
     }
   }
 
@@ -117,11 +92,11 @@ abstract public class Projectile {
   
   
   public Vector<Double> getDirectionVector() {
-    return Metric.getDirectionVector(currentLocation, getTargetLocation());
+    return Metric.getDirectionVector(currentLocation, targetLocation);
   }
 	  
   public double getDirectionAngle() {
-    return Metric.getDirectionAngle(currentLocation, getTargetLocation());
+    return Metric.getDirectionAngle(currentLocation, targetLocation);
   }
 	  
   protected Mob getMob() {
@@ -130,14 +105,6 @@ abstract public class Projectile {
 
   protected void setMob(Mob mob) {
     this.targetMob = mob;
-  }
-
-  private Point getTargetLocation() {
-    return targetLocation;
-  }
-
-  private void setTargetLocation(Point targetLocation) {
-    this.targetLocation = targetLocation;
   }
 
   public String getImageFilePath() {
@@ -160,21 +127,17 @@ abstract public class Projectile {
     return currentLocation.getY();
   }
 
-
-  public void step() {
-    // TODO Auto-generated method stub
-    
-  }
-
-
   public void update() {
-    // TODO Auto-generated method stub
-    
+    if (hasReachedTarget()) {
+      terminate();
+      hit = true;
+    } else {
+      updateLocation();
+    }
   }
 
 
   public boolean isDone() {
-    // TODO Auto-generated method stub
-    return false;
+    return hit;
   }
 }

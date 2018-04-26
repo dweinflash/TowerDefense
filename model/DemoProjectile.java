@@ -28,6 +28,5 @@ public class DemoProjectile extends Projectile {
   @Override
   protected void terminate() {
     targetMob.takeDamage(baseDmg, dmgType);
-    theGame.remove(this);
   }
 }

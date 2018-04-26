@@ -17,7 +17,7 @@ import views.MapView;
  */
 public class Tank  extends Tower{
 	 public Tank(Point loc, TowerGame game) {
-		 super(0, "Library", loc, Range.DEMO_RANGE, "file:assets/images/tower/tank.png", game);
+		 super(0, "Library", loc, Range.DEMO_RANGE, "file:assets/images/tower/tank.png", game, 120);
 	 }
 
 	@Override

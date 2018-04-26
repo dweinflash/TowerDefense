@@ -16,7 +16,7 @@ import views.MapView;
  */
 public class Depot extends Tower {
   public Depot(Point loc, TowerGame game) {
-    super(0, "Library", loc, Range.DEMO_RANGE, "file:assets/images/tower/depot.png", game);
+    super(0, "Library", loc, Range.DEMO_RANGE, "file:assets/images/tower/depot.png", game, 120);
   }
 
   @Override

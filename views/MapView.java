@@ -441,18 +441,22 @@ public class MapView extends StackPane implements Observer {
   * 
   * @return: None
   */
+  
   public void drawMap() {
-	gc.drawImage(background, 0, 0);
-System.out.println("Drew background.");
-    gc.strokeLine(0, 800, 800, 800);
-
-    drawTowers();
-    drawMobs();
-    drawProjectiles();
-
-    if(towerPlacement) {
-      drawGhostTower();
-    }
+    gc.drawImage(background, 0, 0);
+    Platform.runLater(new Runnable() {//TODO: fix this
+      @Override
+        public void run() {
+          gc.drawImage(background, 0, 0);
+          drawTowers();
+          drawMobs();
+          drawProjectiles();
+  
+          if(towerPlacement) {
+            drawGhostTower();
+          }
+        }
+      });
   }
 
   private void drawProjectiles() {
@@ -525,6 +529,8 @@ System.out.println("Drew background.");
 		if(currName.equals(button.getName())) {
 			towerPlacement=false;
 			return;
+		} else if (theGame.getCash() < 50){
+		  return;
 		}
 		
 		towerPlacement=true;
@@ -574,6 +580,7 @@ System.out.println("Drew background.");
 			}
 			
 			theGame.add(newTower);
+			theGame.decrementCash(50);
 
 		}
 		System.out.println("Mouse Clicked");
@@ -584,7 +591,7 @@ System.out.println("Drew background.");
   @Override
   public void update(Observable o, Object arg) {
     drawMap();
-System.out.println("Map drawn");
+
     double health = thePlayer.getHP() / 100;
     String healthStr = formatter.format(health);
     
@@ -594,7 +601,7 @@ System.out.println("Map drawn");
     // UI can't be updated on a non-application thread
     // Since drawMap() is called from a non-application thread,
     // add this thread to the event queue to be called later
-    /*
+    
     Platform.runLater(new Runnable() {
         @Override
         public void run() {
@@ -602,10 +609,10 @@ System.out.println("Map drawn");
           healthNum.setText(healthStr);
           killsNum.setText(String.valueOf(theGame.getKillCount()));
           cashNum.setText("$"+cashStr);
-        }//TODO see if I can change this.
-    });*/
+        }
+    });
     
-    System.out.println("Update view finished.");
+    
   }
 }
 

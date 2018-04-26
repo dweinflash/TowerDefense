@@ -44,7 +44,7 @@ public class ControllerMain extends Application {
   public final static int GUI_SIZE = 800;
   public final static int MOBS_PER_SCREEN = 50; // How many 1x1 sprites should fit on an axis of the gui.
   public final static int TILE_SIZE = GUI_SIZE / MOBS_PER_SCREEN;
-  public final static int UPDATE_FREQUENCY = 50;
+  public final static int UPDATE_FREQUENCY = 17;
   public final static int GUI_WIDTH = GUI_SIZE;
   public final static int GUI_HEIGHT = (int) Math.round(GUI_SIZE * 1.1);
 
@@ -249,7 +249,8 @@ System.out.println("map selection set");
    */
   public static Image getGraphic(String imgfp) {
     if (!imageMap.containsKey(imgfp)) {
-      imageMap.put(imgfp, new Image(imgfp));
+    //TODO: Ben, will you figure out the appropriate resolution?
+      imageMap.put(imgfp, new Image(imgfp, 100, 0, true, false)); 
     }
     return imageMap.get(imgfp);
   }
@@ -305,6 +306,8 @@ System.out.println("map selection set");
         ControllerMain.currentView.setEffect(null);
         ControllerMain.resetMainMenu();
         popupStage.hide();
+        theGame = null;
+        theMapView = null;
       });
 
       popupStage.show();
